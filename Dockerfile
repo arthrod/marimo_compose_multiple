@@ -10,6 +10,7 @@ RUN cd /srv/jupyterhub && jupyterhub --generate-config && \
     pip install uv && \
     uv pip install --no-cache-dir \
         dockerspawner \
+        oauthenticator \
         psycopg2-binary \
         click \
         nbformat \
@@ -17,6 +18,7 @@ RUN cd /srv/jupyterhub && jupyterhub --generate-config && \
         notebook \
         'marimo>=0.6.21' \
         jupyter-collaboration \
+        jupyter-server-proxy \
         https://github.com/jyio/jupyter-marimo-proxy/archive/main.zip \
         --system --break-system-packages
 

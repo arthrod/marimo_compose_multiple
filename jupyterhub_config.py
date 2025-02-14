@@ -1,44 +1,7 @@
-# Basic Authentication Configuration
-c.JupyterHub.authenticator_class = 'jupyterhub.auth.PAMAuthenticator'
-
-# Define allowed users explicitly
-c.Authenticator.allowed_users = {'arthrod', 'guest', 'pc', 'fortuna'}
-c.Authenticator.admin_users = {'arthrod'}  # Make arthrod an admin
-
-# Allow users to add/remove other users once added
-c.Authenticator.allow_existing_users = True
-
-# Enable sharing capabilities
-c.JupyterHub.load_roles = [
-    {
-        "name": "user",
-        "scopes": [
-            "self",
-            "shares!user",
-            "read:users:name",
-            "read:groups:name"
-        ],
-    },
-    {
-        "name": "admin",
-        "groups": ["admin"],
-        "scopes": [
-            "admin:users",
-            "admin:servers",
-            "admin:groups",
-            "list:users",
-            "list:servers",
-            "read:users:activity",
-            "read:users:name",
-            "read:users:groups",
-            "read:groups:name",
-        ],
-        "users": ["arthrod"]
-    }
-]
-
-# Enable server sharing capabilities
-c.Spawner.oauth_client_allowed_scopes = ["access:servers!server", "shares!server"]
+# GitHub OAuth Configuration
+c.JupyterHub.authenticator_class = 'oauthenticator.GitHubOAuthenticator'
+c.GitHubOAuthenticator.oauth_callback_url = os.environ.get('OAUTH_CALLBACK_URL')
+c.Authenticator.admin_users = {'arthrod'}
 
 # Groups configuration
 c.JupyterHub.load_groups = {
@@ -46,3 +9,39 @@ c.JupyterHub.load_groups = {
     "users": ["arthrod", "guest", "pc", "fortuna"],
     "collaborative": {"users": []},
 }
+
+# Docker spawner configuration
+c.JupyterHub.spawner_class = 'dockerspawner.DockerSpawner'
+c.DockerSpawner.image = 'jupyter/base-notebook:latest'
+c.DockerSpawner.network_name = os.environ.get('DOCKER_NETWORK_NAME', 'hubnet')
+c.DockerSpawner.remove = True
+
+# Marimo configuration
+c.Spawner.default_url = '/lab'
+c.Spawner.cmd = ['jupyter-labhub']
+c.Spawner.environment = {
+    'MARIMO_WORKSPACE': '{username}',
+    'MARIMO_SHARED': '/shared'
+}
+
+# Volume mounts for user data persistence
+c.DockerSpawner.volumes = {
+    'jupyterhub-user-{username}': '/home/jovyan/work',
+    'shared': '/shared'
+}
+
+# Allow named servers
+c.JupyterHub.allow_named_servers = True
+c.JupyterHub.named_server_limit_per_user = 2
+
+# Services
+c.JupyterHub.services = [
+    {
+        'name': 'marimo-proxy',
+        'url': 'http://127.0.0.1:9000',
+        'command': ['jupyter-marimo-proxy'],
+        'environment': {
+            'MARIMO_SHARED': '/shared'
+        }
+    }
+]
