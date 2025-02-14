@@ -1,0 +1,28 @@
+# User Passwords (simple for testing)
+ARTHRODPASS=arthrod123
+GUESTPASS=guest123
+PCPASS=pc123
+FORTUNAPASS=fortuna123
+
+# JupyterHub Security (test values)
+JH_COOKIE_SECRET=f624ec6f3c9120684e59b37b13d9c0d233cd7c651ed31508726daa558f146325
+JH_CRYPT_KEY=9ae2ff4b1fd24e3ba2361bb55d4b5126496ba12c238c19e3da9da8b7dbf0c908
+
+# Domain Configuration (localhost)
+JH_DOMAIN=localhost
+JH_SUBDOMAIN=jupyter
+JH_CERTRESOLVER_NAME=local
+JH_HOME=./jupyterhub
+
+# GitLab Integration (disabled for local testing)
+GL_DOMAIN=localhost
+JH_GITLAB_APPLICATION_ID=
+JH_GITLAB_SECRET=
+
+# PostgreSQL Configuration (simple for testing)
+POSTGRES_DB=jupyterhub
+POSTGRES_USER=jupyterhub
+POSTGRES_PASSWORD=jupyterhubpass
+
+# Docker Configuration
+DOCKER_JUPYTERLAB_IMAGE=jupyter/base-notebook:latest

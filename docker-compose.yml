@@ -23,7 +23,6 @@ services:
       - pc_data:/home/pc
       - fortuna_data:/home/fortuna
     environment:
-      - DOCKER_JUPYTERLAB_IMAGE=${DOCKER_JUPYTERLAB_IMAGE}
       - DOCKER_NETWORK_NAME=jupyter
       - GITLAB_URL=https://gitlab.${GL_DOMAIN}
       - GITLAB_CLIENT_ID=${JH_GITLAB_APPLICATION_ID}
@@ -66,9 +65,9 @@ services:
 
 networks:
   jupyter:
-    external: true
+    external: false 
   webproxy:
-    external: true
+    external: false
 
 volumes:
   jupyterhub_data:
