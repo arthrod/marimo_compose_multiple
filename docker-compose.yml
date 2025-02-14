@@ -1,0 +1,80 @@
+version: '3'
+
+services:
+  jupyterhub:
+    build:
+      context: .
+      args:
+        - ARTHRODPASS=${ARTHRODPASS}
+        - GUESTPASS=${GUESTPASS}
+        - PCPASS=${PCPASS}
+        - FORTUNAPASS=${FORTUNAPASS}
+    restart: always
+    networks:
+      - jupyter
+      - webproxy
+    volumes:
+      - ${JH_HOME:-.}/config/jupyterhub_config.py:/srv/jupyterhub/jupyterhub_config.py
+      - /var/run/docker.sock:/var/run/docker.sock
+      - jupyterhub_data:/srv/jupyterhub
+      - shared_data:/shared
+      - arthrod_data:/home/arthrod
+      - guest_data:/home/guest
+      - pc_data:/home/pc
+      - fortuna_data:/home/fortuna
+    environment:
+      - DOCKER_JUPYTERLAB_IMAGE=${DOCKER_JUPYTERLAB_IMAGE}
+      - DOCKER_NETWORK_NAME=jupyter
+      - GITLAB_URL=https://gitlab.${GL_DOMAIN}
+      - GITLAB_CLIENT_ID=${JH_GITLAB_APPLICATION_ID}
+      - GITLAB_CLIENT_SECRET=${JH_GITLAB_SECRET}
+      - JPY_COOKIE_SECRET=${JH_COOKIE_SECRET}
+      - JUPYTERHUB_CRYPT_KEY=${JH_CRYPT_KEY}
+      - JUPYTERHUB_DOMAIN=${JH_DOMAIN}
+      - JUPYTERHUB_SUBDOMAIN=${JH_SUBDOMAIN:-jupyter}
+      - POSTGRES_HOST=jupyterhub-postgres
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    env_file:
+      - .env
+    depends_on:
+      - jupyterhub-postgres
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=webproxy
+      - traefik.http.services.jupyterhub.loadbalancer.server.port=8000
+      - traefik.http.routers.jupyterhub.entrypoints=web
+      - traefik.http.routers.jupyterhub.rule=Host(`${JH_SUBDOMAIN}.${JH_DOMAIN}`)
+      - traefik.http.routers.jupyterhub.middlewares=http2https@file
+      - traefik.http.routers.jupyterhub-sec.entrypoints=websecure
+      - traefik.http.routers.jupyterhub-sec.rule=Host(`${JH_SUBDOMAIN}.${JH_DOMAIN}`)
+      - traefik.http.routers.jupyterhub-sec.tls.certresolver=${JH_CERTRESOLVER_NAME}
+      - traefik.http.routers.jupyterhub-sec.middlewares=sts@file
+
+  jupyterhub-postgres:
+    image: postgres:16-alpine
+    restart: always
+    networks:
+      - jupyter
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - jupyterhub-postgres-data:/var/lib/postgresql/data
+
+networks:
+  jupyter:
+    external: true
+  webproxy:
+    external: true
+
+volumes:
+  jupyterhub_data:
+  jupyterhub-postgres-data:
+  shared_data:
+  arthrod_data:
+  guest_data:
+  pc_data:
+  fortuna_data:
