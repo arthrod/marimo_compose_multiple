@@ -1,9 +1,9 @@
 import os
-import random
 import string
 from pathlib import Path
 
 from jupyterhub.config import get_config
+import secrets
 
 # JupyterHub config object
 c = get_config()
@@ -154,7 +154,7 @@ c.Spawner.options_from_form = options_from_form
 # -----------------------------------------------------------------------------
 # If you want to supply a cookie secret or let Hub generate. Usually the volume persists it.
 if not Path("/srv/jupyterhub/jupyterhub_cookie_secret").exists():
-    secret = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(32))
+    secret = ''.join(secrets.choice(string.ascii_letters + string.digits) for _ in range(32))
     with Path("/srv/jupyterhub/jupyterhub_cookie_secret").open("w") as f:
         f.write(secret)
     print("Generated a new cookie secret at /srv/jupyterhub/jupyterhub_cookie_secret")
